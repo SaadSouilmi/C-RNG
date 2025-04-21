@@ -2,20 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
 #include "ran.h"
 
 
 int get_state_file_path(char *buffer, size_t size)
 {
-    const char *xdg = getenv("XDG_STATE_HOME");
     const char *home = getenv("HOME");
     const char *base = NULL;
 
-    if (xdg && strlen(xdg) > 0){
-        base = xdg;
-    } else if (home && strlen(home) > 0){
+    if (home && strlen(home) > 0){
         base = home;
     } else{
         return 0;
