@@ -127,6 +127,7 @@ void sample_unif(Ran *rng, uint64_t n, FILE *out)
 
 void sample_zigg(Ran *rng, uint64_t n, FILE *out)
 {
+    initialize_zigg_params();
     for (uint64_t i = 0; i < n; i++)
     {
       fprintf(out, "%.10f\n", ran_normal_ziggurat(rng));

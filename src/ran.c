@@ -14,17 +14,10 @@ typedef struct {
 } Ran;
 
 uint64_t ran_uint64(Ran* rng);
-static void initialize_zigg_params(void);
 
 // Initialise with integer seed 
 void ran_init(Ran* rng, uint64_t seed)
 {
-    static int zigg_inited = 0;
-    if (!zigg_inited) {
-        initialize_zigg_params();
-        zigg_inited = 1;
-    }
-    
     uint64_t x;
     rng->v = 4101842887655102017LL;
     rng->w = 1;
@@ -67,7 +60,7 @@ double ran_doub(Ran* rng)
 // Initialising Ziggurat parameters 
 static double ZIGG_X[ZIGG_C+1], ZIGG_XX[ZIGG_C];
 
-static void initialize_zigg_params(void)
+static void initialize_zigg_params_(void)
 {
     double f = exp(-0.5 * ZIGG_R * ZIGG_R);
     ZIGG_X[0] = ZIGG_V / f;
@@ -84,6 +77,15 @@ static void initialize_zigg_params(void)
     }
 }
 
+void initialize_zigg_params(void)
+{
+    static int zigg_inited = 0;
+    if (!zigg_inited) {
+        initialize_zigg_params_();
+        zigg_inited = 1;
+    }
+    
+}
 // Ref: https://apps.dtic.mil/sti/tr/pdf/AD0423993.pdf
 double ran_normal_tail(Ran* rng, double a, int sign)
 {
