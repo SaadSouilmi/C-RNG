@@ -2,24 +2,22 @@
 #include <stdint.h> 
 #include <string.h>
 #include <stdio.h>
-#include "state.h"
 #include "ran.h"
+#include "state.h"
+#include "sample.h"
 
 void print_help(const char *prog_name);
-void parse_args(int argc, char* argv[], char **dist, uint64_t *seed, int *provided_seed, uint64_t *n, char **output_path, int *provided_out);
-void sample(Ran *rng, uint64_t n, FILE *out, char *dist);
-void sample_unif(Ran *rng, uint64_t n, FILE *out);
-void sample_zigg(Ran *rng, uint64_t n, FILE *out);
-void sample_uint(Ran *rng, uint64_t n, FILE *out);
+void parse_args(int argc, char* argv[], Distrib *dist, uint64_t *seed, int *provided_seed, uint64_t *n, char **output_path, int *provided_out);
     
 int main(int argc, char **argv)
 {
     char state_file[512];
     int path_found = get_state_file_path(state_file, sizeof(state_file));
     
+    Distrib dist; 
     uint64_t seed, n; 
     int provided_seed, provided_out;
-    char *output_path, *dist;
+    char *output_path;
     parse_args(argc, argv, &dist, &seed, &provided_seed, &n, &output_path, &provided_out);
         
     Ran rng;
@@ -50,10 +48,10 @@ int main(int argc, char **argv)
     return 0; 
 }
 
-void parse_args(int argc, char* argv[], char **dist, uint64_t *seed, int *provided_seed, uint64_t *n, char **output_path, int *provided_out)
+void parse_args(int argc, char* argv[], Distrib *dist, uint64_t *seed, int *provided_seed, uint64_t *n, char **output_path, int *provided_out)
 {
     // default values 
-    *dist = "unif";
+    *dist = DIST_UNIF;
     *seed = 1337;
     *n = 1;
     *provided_seed = 0;
@@ -65,11 +63,11 @@ void parse_args(int argc, char* argv[], char **dist, uint64_t *seed, int *provid
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") ==0)
         {
             print_help(argv[0]);
-            exit(0);
+            exit(EXIT_SUCCESS);
         }
         if (strcmp(argv[i], "--dist") == 0 && i + 1 < argc)
         {
-          *dist = argv[i+1];
+          *dist = parse_dist(argv[i+1]);
           i++;
         }
         if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc)
@@ -99,45 +97,3 @@ void print_help(const char *prog_name)
 }
 
 
-void sample(Ran *rng, uint64_t n, FILE *out, char *dist)
-{
-    if (strcmp(dist, "unif") == 0)
-    {
-        sample_unif(rng, n, out);
-    } else if (strcmp(dist, "normal") == 0)
-    {
-        sample_zigg(rng, n, out);
-    } else if (strcmp(dist, "uint") == 0)
-    {
-        sample_uint(rng, n, out);
-    } else
-    {
-        fprintf(stderr, "%s is not a supported distribution. See help for more info.\n", dist);
-        exit(0);
-    }
-}
-
-void sample_unif(Ran *rng, uint64_t n, FILE *out)
-{
-    for (uint64_t i = 0; i < n; i++)
-    {
-        fprintf(out, "%.10f\n", ran_doub(rng));
-    }
-}
-
-void sample_zigg(Ran *rng, uint64_t n, FILE *out)
-{
-    initialize_zigg_params();
-    for (uint64_t i = 0; i < n; i++)
-    {
-      fprintf(out, "%.10f\n", ran_normal_ziggurat(rng));
-    }
-}
-
-void sample_uint(Ran *rng, uint64_t n, FILE *out)
-{
-    for (uint64_t i = 0; i < n; i++)
-    {
-        fprintf(out, "%u\n", ran_uint64(rng) & 0X7F);
-    }
-}

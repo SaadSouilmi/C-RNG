@@ -10,14 +10,16 @@ typedef struct {
     uint64_t w;
 } Ran;
 
-// Function declarations
+
 void ran_init(Ran* rng, uint64_t seed);
 uint64_t ran_uint64(Ran* rng);
 uint32_t ran_uint32(Ran* rng);
 double ran_doub(Ran* rng);
+
+// Ziggurat functions 
 void initialize_zigg_params(void);
-double ran_normal_tail(Ran* rng, double a);
+double ran_normal_tail(Ran* rng, double a, int sign);
 double ran_normal_ziggurat(Ran* rng);
 
 
-#endif // RNG_H
+#endif

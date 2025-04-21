@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -std=c11 -Iinclude
 LDFLAGS = -lm
-SRC = src/main.c src/ran.c src/state.c
+SRC = src/main.c src/ran.c src/state.c src/sample.c
 OUT = crng
 PREFIX ?= /usr/local/
 DESTDIR ?= 

@@ -1,21 +1,14 @@
 // RNG from Numerical recipes book : https://numerical.recipes/book.html
+#include "ran.h"
 #include <math.h>
 #include <stdint.h>
 
 static const int ZIGG_C = 128;
 static const double ZIGG_R = 3.442619855899;
 static const double ZIGG_V = 9.91256303526217e-3;
+static double ZIGG_X[ZIGG_C+1], ZIGG_XX[ZIGG_C];
 
-// RNG state 
-typedef struct {
-    uint64_t u;
-    uint64_t v;
-    uint64_t w;
-} Ran;
-
-uint64_t ran_uint64(Ran* rng);
-
-// Initialise with integer seed 
+// RNG ref: https://numerical.recipes/book.html
 void ran_init(Ran* rng, uint64_t seed)
 {
     uint64_t x;
@@ -29,7 +22,6 @@ void ran_init(Ran* rng, uint64_t seed)
     x = ran_uint64(rng);
 }
 
-// Sample uniformly from 64bit unsingned ints
 uint64_t ran_uint64(Ran* rng)
 {
     rng->u = rng->u * 2862933555777941757LL + 7046029254386353087LL;
@@ -44,21 +36,17 @@ uint64_t ran_uint64(Ran* rng)
     return (x + rng->v) ^ rng->w;
 }
 
-// Sample uniformly from 32bit unsigned ints
 uint32_t ran_uint32(Ran* rng)
 {
     return (uint32_t)ran_uint64(rng);
 }
 
-// Sample uniformly from doubles in [0, 1]
+// Sample uniformly [0, 1]
 double ran_doub(Ran* rng)
 {
     return 5.42101086242752217E-20 * ran_uint64(rng); 
 }
 
-
-// Initialising Ziggurat parameters 
-static double ZIGG_X[ZIGG_C+1], ZIGG_XX[ZIGG_C];
 
 static void initialize_zigg_params_(void)
 {
@@ -86,6 +74,7 @@ void initialize_zigg_params(void)
     }
     
 }
+
 // Ref: https://apps.dtic.mil/sti/tr/pdf/AD0423993.pdf
 double ran_normal_tail(Ran* rng, double a, int sign)
 {
@@ -100,7 +89,6 @@ double ran_normal_tail(Ran* rng, double a, int sign)
     // sign == 1 for positive and 0 for negative
     return sign ? x: -x;
 }
-
 
 // Ref: https://www.doornik.com/research/ziggurat.pdf
 double ran_normal_ziggurat(Ran* rng)

@@ -1,7 +1,7 @@
 .vscode/
 papers/
-figures/
+figures/readme.pdf
 crng 
 .DS_Store
 samples/
-scripts/
+scripts/gaussian_tail_efficiency.py
