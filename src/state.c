@@ -19,15 +19,18 @@ int get_state_file_subpath(char *buffer, size_t size, const char *filename)
     }
 
     char dir_path[512];
-    if (snprintf(dir_path, sizeof(dir_path), "%s/.ran_c", base) >= sizeof(dir_path)) {
+    if (snprintf(dir_path, sizeof(dir_path), "%s/.ran_c", base) >= sizeof(dir_path))
+    {
         return 0;
     }
 
-    if (mkdir(dir_path, 0700) == -1 && errno != EEXIST){
+    if (mkdir(dir_path, 0700) == -1 && errno != EEXIST)
+    {
         return 0;
     }
 
-    if (snprintf(buffer, size, "%s/%s", dir_path, filename) >= size){
+    if (snprintf(buffer, size, "%s/%s", dir_path, filename) >= size)
+    {
         return 0;
     }
 

@@ -5,3 +5,4 @@ crng
 .DS_Store
 samples/
 scripts/gaussian_tail_efficiency.py
+*.swp
