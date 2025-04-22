@@ -12,7 +12,7 @@ void parse_args(int argc, char* argv[], Distrib *dist, uint64_t *seed, int *prov
 int main(int argc, char **argv)
 {
     char state_file[512];
-    int path_found = get_state_file_path(state_file, sizeof(state_file));
+    int path_found = get_state_file_subpath(state_file, sizeof(state_file), "state.bin");
     
     Distrib dist; 
     uint64_t seed, n; 

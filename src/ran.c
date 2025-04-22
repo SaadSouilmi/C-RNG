@@ -1,12 +1,17 @@
 // RNG from Numerical recipes book : https://numerical.recipes/book.html
 #include "ran.h"
+#include "state.h"
 #include <math.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-static const int ZIGG_C = 128;
-static const double ZIGG_R = 3.442619855899;
-static const double ZIGG_V = 9.91256303526217e-3;
+#define ZIGG_C 128
+#define ZIGG_R 3.442619855899
+#define ZIGG_V 9.91256303526217e-3
 static double ZIGG_X[ZIGG_C+1], ZIGG_XX[ZIGG_C];
+
+// --- Core RNG functionnality --- 
 
 // RNG ref: https://numerical.recipes/book.html
 void ran_init(Ran* rng, uint64_t seed)
@@ -47,6 +52,7 @@ double ran_doub(Ran* rng)
     return 5.42101086242752217E-20 * ran_uint64(rng); 
 }
 
+//--- Ziggurat implementation ---
 
 static void initialize_zigg_params_(void)
 {
@@ -69,7 +75,18 @@ void initialize_zigg_params(void)
 {
     static int zigg_inited = 0;
     if (!zigg_inited) {
-        initialize_zigg_params_();
+        char ziggx_path[512], ziggxx_path[512];
+        int got_ziggx_path = get_state_file_subpath(ziggx_path, sizeof(ziggx_path), "ziggx.bin");
+        int got_ziggxx_path = get_state_file_subpath(ziggxx_path, sizeof(ziggxx_path), "ziggxx.bin");
+        if (!got_ziggx_path ||
+            !got_ziggxx_path || 
+            !load_array_double(ziggx_path, ZIGG_X, ZIGG_C+1) || 
+            !load_array_double(ziggxx_path, ZIGG_XX, ZIGG_C))
+        {
+            initialize_zigg_params_();
+            save_array_double(ziggx_path, ZIGG_X, ZIGG_C+1);
+            save_array_double(ziggxx_path, ZIGG_XX, ZIGG_C);
+        }
         zigg_inited = 1;
     }
     
