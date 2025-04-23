@@ -2,7 +2,12 @@
 #define ARGS_H
 
 #include <stdint.h>
-#include <sample.h>
+
+typedef enum {
+    DIST_UNIF,
+    DIST_UINT,
+    DIST_NORMAL,
+} Distrib;
 
 typedef enum {
     ARG_DISTRIB,

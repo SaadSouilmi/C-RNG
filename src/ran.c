@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define ZIGG_C 128
 #define ZIGG_R 3.442619855899
@@ -27,7 +28,7 @@ void ran_init(Ran* rng, uint64_t seed)
     x = ran_uint64(rng);
 }
 
-uint64_t ran_uint64(Ran* rng)
+uint64_t ran_uint64(Ran *rng)
 {
     rng->u = rng->u * 2862933555777941757LL + 7046029254386353087LL;
     rng->v ^= rng->v >> 17;
@@ -41,15 +42,34 @@ uint64_t ran_uint64(Ran* rng)
     return (x + rng->v) ^ rng->w;
 }
 
-uint32_t ran_uint32(Ran* rng)
+uint32_t ran_uint32(Ran *rng)
 {
     return (uint32_t)ran_uint64(rng);
 }
 
 // Sample uniformly [0, 1]
-double ran_doub(Ran* rng)
+double ran_doub(Ran *rng)
 {
     return 5.42101086242752217E-20 * ran_uint64(rng); 
+}
+
+// Sample an integer uniformly from  [0, n)
+uint64_t ran_range(Ran *rng, uint64_t a)
+{
+    assert(a > 0);
+    uint64_t r; 
+    
+    if (!(a & (a-1)))
+    {
+        return ran_uint64(rng) & (a-1);
+    }
+    
+    uint64_t threshold = -a % a;
+    do
+    {
+        r = ran_uint64(rng);
+    } while (r >= threshold);
+    return r;
 }
 
 //--- Ziggurat implementation ---

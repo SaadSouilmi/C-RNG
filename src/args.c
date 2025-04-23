@@ -48,7 +48,6 @@ void parse_args(int argc, char **argv, ParsedArgs *args)
                     exit(EXIT_FAILURE);
                 }
                 args->dist = parse_dist(argv[i+1]);
-                args->provided_seed = 1;
                 i++;
                 break;
             case ARG_SEED:
@@ -58,6 +57,7 @@ void parse_args(int argc, char **argv, ParsedArgs *args)
                     exit(EXIT_FAILURE);
                 }
                 args->seed = strtoull(argv[i+1], NULL, 10);
+                args->provided_seed = 1;
                 i++;
                 break;
             case ARG_COUNT:

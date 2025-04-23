@@ -1,4 +1,5 @@
 #include "sample.h"
+#include "args.h"
 #include "ran.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -14,18 +15,18 @@ Distrib parse_dist(const char *dist)
     exit(EXIT_FAILURE);
 }
 
-void sample(Ran *rng, uint64_t n, FILE *out, Distrib dist)
+void sample(Ran *rng, ParsedArgs args, FILE *out)
 {
-    switch (dist)
+    switch (args.dist)
     {
         case DIST_UNIF:
-            sample_unif(rng, n, out);
+            sample_unif(rng, args.n, out);
             break;
         case DIST_UINT:
-            sample_uint(rng, n, out);
+            sample_uint(rng, args.n, out);
             break;
         case DIST_NORMAL:
-            sample_zigg(rng, n, out);
+            sample_zigg(rng, args.n, out);
             break;
     }
 }

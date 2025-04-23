@@ -15,6 +15,7 @@ void ran_init(Ran* rng, uint64_t seed);
 uint64_t ran_uint64(Ran* rng);
 uint32_t ran_uint32(Ran* rng);
 double ran_doub(Ran* rng);
+uint64_t ran_range(Ran* rng, uint64_t a);
 
 // Ziggurat functions 
 void initialize_zigg_params(void);

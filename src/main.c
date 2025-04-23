@@ -30,7 +30,7 @@ int main(int argc, char **argv)
             return 1;
         }
     }
-    sample(&rng, args.n, out, args.dist);
+    sample(&rng, args, out);
 
     if (args.provided_out)
     {
