@@ -131,12 +131,18 @@ double ran_normal_tail(Ran* rng, double a, int sign)
 double ran_normal_ziggurat(Ran* rng)
 {   
     double u, x, f0, f1;
+    uint64_t j; 
     uint8_t i;
 
     for (;;)
     {
-        u = 2 * ran_doub(rng) - 1;
-        i = ran_uint64(rng) & 0x7F;
+        // Neat trick here, the sampling of x and of the bin number don't 
+        // have to be strictly independant granted the RNG is good enough.
+        // i.e: we take the 7 least significant bits of a random uint64 and 
+        // still use that same uint64 to sample from [-1, 1]
+        j = ran_uint64(rng);
+        i = j & 0x7F;
+        u = j * 5.42101086242752217E-20 * 2 - 1; 
         x = u * ZIGG_X[i];
 
         if (fabs(u) < ZIGG_XX[i])
