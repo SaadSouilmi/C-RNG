@@ -16,6 +16,11 @@ typedef enum {
     ARG_COUNT,
     ARG_DIR,
     ARG_HELP,
+    ARG_MEAN,
+    ARG_STDDEV,
+    ARG_LAMBDA,
+    ARG_A,
+    ARG_B, 
     ARG_UNKNOWN,
 } ArgType;
 
@@ -26,6 +31,26 @@ typedef struct {
     uint64_t n;
     char *output_path;
     int provided_out;
+    // Distribution parameters 
+    union {
+        struct {
+            double mean;
+            double stddev;
+        } normal;
+
+        struct {
+            double lambda;
+        } exp;
+
+        struct {
+            double a;
+            double b;
+        } unif;
+        
+        struct{
+            uint64_t a;
+        } uint;
+    } params;
 } ParsedArgs;
 
 

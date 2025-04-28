@@ -64,19 +64,19 @@ double ran_doub(Ran *rng)
 uint64_t ran_range(Ran *rng, uint64_t a)
 {
     assert(a > 0);
-    uint64_t r; 
-    
-    if (!(a & (a-1)))
-    {
-        return ran_uint64(rng) & (a-1);
+    uint64_t r;
+
+    if ((a & (a-1)) == 0) {
+        // power of 2 optimization
+        return ran_uint64(rng) & (a - 1);
     }
-    
-    uint64_t threshold = -a % a;
-    do
-    {
+
+    uint64_t threshold = UINT64_MAX - (UINT64_MAX % a);
+    do {
         r = ran_uint64(rng);
     } while (r >= threshold);
-    return r;
+
+    return r % a;
 }
 
 //--- Ziggurat implementation for normal distributions ---
