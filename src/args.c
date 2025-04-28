@@ -18,7 +18,7 @@ ArgType parse_arg_type(const char *arg)
 void print_help(const char *prog_name)
 {
     printf("Usage: %s [--seed <uint64_t>] [-n <uint32_t>] [--help]\n", prog_name);
-    printf("  --dist               Probability distribution to be sampled {'unif', 'normal'}\n");
+    printf("  --dist               Probability distribution to be sampled {'unif', 'normal', 'exp'}\n");
     printf("  --seed <uint64_t>    Set the seed for the RNG (default: 1337)\n");
     printf("  -n <uint32_t>        Number of random numbers to generate (default: 1)\n");
     printf("  -f <string>          output file\n");

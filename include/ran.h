@@ -17,10 +17,15 @@ uint32_t ran_uint32(Ran* rng);
 double ran_doub(Ran* rng);
 uint64_t ran_range(Ran* rng, uint64_t a);
 
-// Ziggurat functions 
+// Ziggurat normal distrib functions 
 void initialize_zigg_params(void);
 double ran_normal_tail(Ran* rng, double a, int sign);
 double ran_normal_ziggurat(Ran* rng);
+
+// Ziggurat exponential distrib functions
+void initialize_zigg_exp_params(void);
+double ran_exp_ziggurat(Ran *rng);
+
 
 
 #endif

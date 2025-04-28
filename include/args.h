@@ -7,6 +7,7 @@ typedef enum {
     DIST_UNIF,
     DIST_UINT,
     DIST_NORMAL,
+    DIST_EXP,
 } Distrib;
 
 typedef enum {

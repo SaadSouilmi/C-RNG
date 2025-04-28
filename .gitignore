@@ -5,4 +5,5 @@ crng
 .DS_Store
 samples/
 scripts/gaussian_tail_efficiency.py
+scripts/zigg_exp.py
 *.swp

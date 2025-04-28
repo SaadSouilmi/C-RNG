@@ -23,5 +23,7 @@ uninstall:
 
 clean:
 	rm -f $(OUT)
+	rm ~/.ran_c/*.bin
+
 
 .PHONY: all install uninstall clean

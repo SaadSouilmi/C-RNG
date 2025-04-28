@@ -2,7 +2,7 @@ This is a small personal project where I try to build a build an executable prog
 
 The RNG itself I took off this [book](https://numerical.recipes/).
 
-For now I have only implemented normal distribution using the [ziggurat method](https://www.doornik.com/research/ziggurat.pdf). 
+For now I have only implemented normal and exponential distributions using the [ziggurat method](https://www.doornik.com/research/ziggurat.pdf). 
 
 The internal state of the RNG is saved to `$HOME/.ran_c/state.bin` if the file does not exist the rng is initialised from `--seed` which is `1337` by default but can be set to whatever `uint64`.
 
