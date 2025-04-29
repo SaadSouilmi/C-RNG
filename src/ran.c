@@ -13,11 +13,11 @@
 #define ZIGG_C 128
 #define ZIGG_R 3.442619855899
 #define ZIGG_V 9.91256303526217e-3
-static double ZIGG_X[ZIGG_C+1], ZIGG_XX[ZIGG_C];
+static double ZIGG_X[ZIGG_C+1], ZIGG_XX[ZIGG_C], ZIGG_F[ZIGG_C];
 
 #define ZIGG_C_EXP 256
 #define ZIGG_R_EXP 7.69711747013104972
-static double ZIGG_X_EXP[ZIGG_C_EXP+1], ZIGG_XX_EXP[ZIGG_C_EXP];
+static double ZIGG_X_EXP[ZIGG_C_EXP+1], ZIGG_XX_EXP[ZIGG_C_EXP], ZIGG_F_EXP[ZIGG_C_EXP];
 
 // --- Core RNG functionnality --- 
 
@@ -93,8 +93,10 @@ static void initialize_zigg_params_(void)
         ZIGG_X[i] = sqrt(-2 * log(f + ZIGG_V / ZIGG_X[i - 1]));
         f = exp(-0.5 * ZIGG_X[i] * ZIGG_X[i]);
     }
-    for (int i = 0; i < ZIGG_C; i++){
+    for (int i = 0; i < ZIGG_C; i++)
+    {
         ZIGG_XX[i] = ZIGG_X[i+1] / ZIGG_X[i];
+        ZIGG_F[i] = exp(-0.5 * ZIGG_X[i+1] * ZIGG_X[i+1]);
     }
 }
 
@@ -102,17 +104,21 @@ void initialize_zigg_params(void)
 {
     static int zigg_inited = 0;
     if (!zigg_inited) {
-        char ziggx_path[512], ziggxx_path[512];
+        char ziggx_path[512], ziggxx_path[512], ziggf_path[512];
         int got_ziggx_path = get_state_file_subpath(ziggx_path, sizeof(ziggx_path), "ziggx.bin");
         int got_ziggxx_path = get_state_file_subpath(ziggxx_path, sizeof(ziggxx_path), "ziggxx.bin");
+        int got_ziggf_path = get_state_file_subpath(ziggf_path, sizeof(ziggf_path), "ziggf.bin");
         if (!got_ziggx_path ||
-            !got_ziggxx_path || 
+            !got_ziggxx_path ||
+            !got_ziggf_path ||
             !load_array_double(ziggx_path, ZIGG_X, ZIGG_C+1) || 
-            !load_array_double(ziggxx_path, ZIGG_XX, ZIGG_C))
+            !load_array_double(ziggxx_path, ZIGG_XX, ZIGG_C) ||
+            !load_array_double(ziggf_path, ZIGG_F, ZIGG_C))
         {
             initialize_zigg_params_();
             save_array_double(ziggx_path, ZIGG_X, ZIGG_C+1);
             save_array_double(ziggxx_path, ZIGG_XX, ZIGG_C);
+            save_array_double(ziggf_path, ZIGG_F, ZIGG_C);
         }
         zigg_inited = 1;
     }
@@ -137,7 +143,7 @@ double ran_normal_tail(Ran* rng, double a, int sign)
 // Ref: https://www.doornik.com/research/ziggurat.pdf
 double ran_normal_ziggurat(Ran* rng)
 {   
-    double u, x, f0, f1;
+    double u, x;
     uint64_t j; 
     uint8_t i;
 
@@ -152,16 +158,9 @@ double ran_normal_ziggurat(Ran* rng)
         u = j * UINT64_TO_DOUB * 2 - 1; 
         x = u * ZIGG_X[i];
 
-        if (fabs(u) < ZIGG_XX[i])
-        {
-            return x;
-        }
+        if (fabs(u) < ZIGG_XX[i]) return x;
         if (i == 0) return ran_normal_tail(rng, ZIGG_R, u > 0);
-        
-        f0 = exp(-0.5 * (ZIGG_X[i] * ZIGG_X[i] - x * x));
-        f1 = exp(-0.5 * (ZIGG_X[i+1] * ZIGG_X[i+1] - x * x));
-
-        if (f1 + ran_doub(rng) * (f0 - f1) < 1.0) return x;
+        if (ZIGG_F[i] + ran_doub(rng) * (ZIGG_F[i-1] - ZIGG_F[i]) < exp(-0.5 * x * x)) return x;
      }
 }
 
@@ -180,8 +179,10 @@ static void initialize_zigg_exp_params_(void)
     {
         ZIGG_X_EXP[i] = -log(V / ZIGG_X_EXP[i - 1] + exp(-ZIGG_X_EXP[i-1]));
     }
-    for (int i = 0; i < ZIGG_C_EXP; i++){
+    for (int i = 0; i < ZIGG_C_EXP; i++)
+    {
         ZIGG_XX_EXP[i] = ZIGG_X_EXP[i+1] / ZIGG_X_EXP[i];
+        ZIGG_F_EXP[i] = exp(-ZIGG_X_EXP[i+1]);
     }
 }
 
@@ -189,17 +190,21 @@ void initialize_zigg_exp_params(void)
 {
     static int zigg_exp_inited = 0;
     if (!zigg_exp_inited) {
-        char ziggx_path[512], ziggxx_path[512];
+        char ziggx_path[512], ziggxx_path[512], ziggf_path[512];
         int got_ziggx_path = get_state_file_subpath(ziggx_path, sizeof(ziggx_path), "ziggx_exp.bin");
         int got_ziggxx_path = get_state_file_subpath(ziggxx_path, sizeof(ziggxx_path), "ziggxx_exp.bin");
+        int got_ziggf_path = get_state_file_subpath(ziggf_path, sizeof(ziggf_path), "ziggf_exp.bin");
         if (!got_ziggx_path ||
             !got_ziggxx_path || 
+            !got_ziggf_path ||
             !load_array_double(ziggx_path, ZIGG_X_EXP, ZIGG_C_EXP+1) || 
-            !load_array_double(ziggxx_path, ZIGG_XX_EXP, ZIGG_C_EXP))
+            !load_array_double(ziggxx_path, ZIGG_XX_EXP, ZIGG_C_EXP) ||
+            !load_array_double(ziggf_path, ZIGG_F_EXP, ZIGG_C_EXP))
         {
             initialize_zigg_exp_params_();
             save_array_double(ziggx_path, ZIGG_X_EXP, ZIGG_C_EXP+1);
             save_array_double(ziggxx_path, ZIGG_XX_EXP, ZIGG_C_EXP);
+            save_array_double(ziggf_path, ZIGG_F_EXP, ZIGG_C_EXP);
         }
         zigg_exp_inited = 1;
     }
@@ -209,7 +214,7 @@ void initialize_zigg_exp_params(void)
 
 double ran_exp_ziggurat(Ran *rng)
 {   
-    double u, x, f0, f1;
+    double u, x;
     uint64_t j; 
     uint8_t i;
 
@@ -222,10 +227,6 @@ double ran_exp_ziggurat(Ran *rng)
 
         if (u < ZIGG_XX_EXP[i]) return x;
         if (i == 0) return ZIGG_R_EXP - log(ran_doub(rng));
-        
-        f0 = exp(-(ZIGG_X_EXP[i] - x));
-        f1 = exp(-(ZIGG_X_EXP[i+1] - x));
-
-        if (f1 + ran_doub(rng) * (f0 - f1) < 1.0) return x;
+        if (ZIGG_F_EXP[i] + ran_doub(rng) * (ZIGG_F_EXP[i-1] - ZIGG_F_EXP[i]) < exp(-x)) return x;
      }
 }
