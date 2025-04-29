@@ -18,17 +18,24 @@ ArgType parse_arg_type(const char *arg)
     if (strcmp(arg, "--lambda") == 0) return ARG_LAMBDA;
     if (strcmp(arg, "--a") == 0) return ARG_A;
     if (strcmp(arg, "--b") == 0) return ARG_B;
+    if (strcmp(arg, "--n-threads") == 0) return ARG_NTHREADS;
     return ARG_UNKNOWN;
 }
 
 void print_help(const char *prog_name)
 {
     printf("Usage: %s [--seed <uint64_t>] [-n <uint32_t>] [--help]\n", prog_name);
-    printf("  --dist               Probability distribution to be sampled {'unif', 'normal', 'exp'}\n");
-    printf("  --seed <uint64_t>    Set the seed for the RNG (default: 1337)\n");
-    printf("  -n <uint32_t>        Number of random numbers to generate (default: 1)\n");
-    printf("  -f <string>          output file\n");
-    printf("  --help or -h         Display this help message\n");
+    printf("  --dist                Probability distribution to be sampled {'unif', 'normal', 'exp'}\n");
+    printf("  --seed <uint64_t>     Set the seed for the RNG (default: 1337)\n");
+    printf("  -n <uint32_t>         Number of random numbers to generate (default: 1)\n");
+    printf("  -f <string>           Output file\n");
+    printf("  --mean <double>       Only compatible with --dist=normal\n");
+    printf("  --stddev<double>      Only compatible with --dist=normal\n");
+    printf("  --lambda <double>     Only comatible with --dist=exp, mean of exponential distribution\n");
+    printf("  --a <double(unif)/uint64_t(uint)>         Only compatible with --dist=unif or uint. Can either be lower bound for --dist=unif or the max for --dist=uint\n");
+    printf("  --b <double>          Only compatible with --dist=unif, upper bound\n");
+    printf("  --n-threads <uint8_t> Number of threads to sample in parallel (uses OpenMP under the hood)\n");
+    printf("  --help or -h          Display this help message\n");
 }
 
 void parse_args(int argc, char **argv, ParsedArgs *args)
@@ -39,6 +46,7 @@ void parse_args(int argc, char **argv, ParsedArgs *args)
     args->provided_seed = 0;
     args->output_path = NULL;
     args->provided_out = 0;
+    args->n_threads = 1;
 
     for (int i = 1; i < argc; i++)
     {
@@ -179,6 +187,20 @@ void parse_args(int argc, char **argv, ParsedArgs *args)
                     exit(EXIT_FAILURE);
                 }
                 args->params.unif.b = atof(argv[++i]);
+                break;
+            case ARG_NTHREADS:
+                if (i + 1 >= argc)
+                {
+                    fprintf(stderr, "Missing value after --n-threads\n");
+                    exit(EXIT_FAILURE);
+                }
+                long n_threads = strtol(argv[++i], NULL, 10);
+                if (n_threads <= 0 || n_threads > 255) // seems overkill but I set 255 as a thread limit 
+                {
+                    fprintf(stderr, "n_threads should be between 1 and 255\n");
+                    exit(EXIT_FAILURE);
+                }
+                args->n_threads = (uint8_t)n_threads;
                 break;
             case ARG_UNKNOWN:
             default:

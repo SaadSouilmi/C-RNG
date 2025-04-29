@@ -49,6 +49,14 @@ uint64_t ran_uint64(Ran *rng)
     return (x + rng->v) ^ rng->w;
 }
 
+// Poor man's split
+void ran_split(Ran *parent, Ran *child)
+{
+    child->u = ran_uint64(parent);
+    child->v = ran_uint64(parent);
+    child->w = ran_uint64(parent);
+}
+
 uint32_t ran_uint32(Ran *rng)
 {
     return (uint32_t)ran_uint64(rng);

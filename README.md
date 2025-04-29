@@ -29,3 +29,5 @@ $ python scripts/distribution.py -f sample/samples.txt
 ```
 ![](./figures/normal_sample.png)
 
+
+Working on a multithreading with [OpenMP](https://www.openmp.org/). The idea is to have a splitting à la (JAX)[]. 

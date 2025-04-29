@@ -1,6 +1,6 @@
-CC = gcc
+CC = gcc-14
 CFLAGS = -std=c11 -Iinclude
-LDFLAGS = -lm
+LDFLAGS = -lm -fopenmp
 SRC = src/main.c src/ran.c src/state.c src/sample.c src/args.c
 OUT = crng
 PREFIX ?= /usr/local/

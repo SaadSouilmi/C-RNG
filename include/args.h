@@ -21,6 +21,7 @@ typedef enum {
     ARG_LAMBDA,
     ARG_A,
     ARG_B, 
+    ARG_NTHREADS,
     ARG_UNKNOWN,
 } ArgType;
 
@@ -51,6 +52,7 @@ typedef struct {
             uint64_t a;
         } uint;
     } params;
+    uint8_t n_threads;
 } ParsedArgs;
 
 
